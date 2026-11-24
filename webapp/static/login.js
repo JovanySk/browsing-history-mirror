@@ -12,6 +12,7 @@ async function initializeAccess(){
 }
 document.querySelector('#login').addEventListener('submit',async event=>{
   event.preventDefault();const button=document.querySelector('#enter');button.disabled=true;document.querySelector('#error').textContent='';
-  try{await connectBrowser('/auth/login',{password:document.querySelector('#password').value});}catch(error){document.querySelector('#error').textContent=error.message;button.disabled=false;}
+  const username=document.querySelector('#username').value.trim(),body={password:document.querySelector('#password').value};if(username)body.username=username;
+  try{await connectBrowser('/auth/login',body);}catch(error){document.querySelector('#error').textContent=error.message;button.disabled=false;}
 });
 initializeAccess();

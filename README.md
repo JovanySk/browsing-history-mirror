@@ -25,6 +25,18 @@ Chrome extension (MV3)                         VPS
 - **Live panel:** Server-Sent Events push new visits to the panel. Sessions are persistent, signed and revocable. The panel has search, filters and pages of 100 records.
 - **Operations:** hardened systemd units (`ProtectSystem=strict`, `NoNewPrivileges`, `PrivateTmp`) with `Type=notify` and a 90-second watchdog. Worker processes run separately for archiving and checkpoints.
 
+## Screenshots
+
+All screenshots use synthetic data from `webapp/demo_seed.py`: fictional sites under `*.example.*`, invented page titles, two demo devices. No real browsing history.
+
+| Timeline grouped by day | Search and filters |
+|---|---|
+| ![Timeline](docs/screenshots/01-timeline.png) | ![Search and filters](docs/screenshots/02-search-filter.png) |
+| **Live update over SSE** | **Login** |
+| ![Live update](docs/screenshots/03-live-update.png) | ![Login](docs/screenshots/05-login.png) |
+
+<p align="center"><img src="docs/screenshots/04-mobile.png" alt="Mobile panel" width="300"></p>
+
 ## Results (measured in production)
 
 | Metric | Result |
@@ -53,6 +65,19 @@ About 3,100 lines of JavaScript and Python. The server uses only the Python stan
 2. Extension: copy `extension/web_sync_config.example.js` to `web_sync_config.js`, set your endpoint and device token, and load `extension/` unpacked in Chrome. For the always-on session in `infra/`, set `EXTENSION_ID` (and optionally `BROWSER_BIN`).
 
 Secrets (`web_sync_config.js`, access and token files, databases) are git-ignored and never committed.
+
+## Demo with synthetic data
+
+Try the panel locally without any real history:
+
+```bash
+export HISTORIAL_DATA=$PWD/.demo-data
+python webapp/demo_seed.py && MIRROR_DOMAIN=localhost python webapp/server.py
+```
+
+Then open <http://localhost:6082/> and sign in with the username and password that `demo_seed.py` prints (they are generated per run and only exist in the throwaway directory).
+
+`demo_seed.py` creates the throwaway data directory (it refuses to touch a non-empty directory it did not create), writes demo `tokens.json` and `access.json`, and sends about 1,500 fictional visits from two devices ("Laptop" and "Phone") through the real collector route, `POST /api/collector/sync`. Storage, projection, the timeline index and the search index all run through the app's own code. A few visits are marked as deleted from Chrome. Delete `.demo-data/` when you are done.
 
 ---
 Author: **Jovany Morales del Ángel** · MIT License

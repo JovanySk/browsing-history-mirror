@@ -96,15 +96,16 @@ async function webHeartbeat(force=false){
     if(!meta.lastUpdated)status.textContent='Esperando la primera sincronización de tus datos…';
     else{
       const age=Math.max(0,Math.round((meta.now-meta.lastUpdated)/1000));
-      status.textContent=age<90?'Conector conectado · última señal '+new Date(meta.lastUpdated).toLocaleTimeString('es-MX'):'Datos guardados · última conexión '+new Date(meta.lastUpdated).toLocaleString('es-MX');
+      status.textContent=age<90?'Sincronizado · última señal '+new Date(meta.lastUpdated).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',hour12:false}):'Datos guardados · última conexión '+new Date(meta.lastUpdated).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'});
     }
     document.querySelector('#webMobileStats').textContent=meta.counts.visits.toLocaleString('es-MX')+' visitas';
     await refreshWebState();
     if(force||meta.revision!==lastMeta||Date.now()-lastViewRefresh>2000){lastMeta=meta.revision;lastViewRefresh=Date.now();if(typeof loadView==='function')await loadView({preserveScroll:true});}
     if(typeof refreshPresenceToggle==='function')await refreshPresenceToggle();
-    const pill=document.querySelector('#liveText');
-    if(pill)pill.textContent=meta.now-meta.lastUpdated<90000?'Conectado':'Guardado';
-  }catch(error){webError(error);const pill=document.querySelector('#liveText');if(pill)pill.textContent='Sin conexión';}
+    const pill=document.querySelector('#liveText'),live=meta.now-meta.lastUpdated<90000;
+    if(pill)pill.textContent=live?'En vivo':'Guardado';
+    document.querySelector('#livePill')?.classList.toggle('off',!live);
+  }catch(error){webError(error);const pill=document.querySelector('#liveText');if(pill)pill.textContent='Sin conexión';document.querySelector('#livePill')?.classList.add('off');}
   finally{webHeartbeatBusy=false;if(webHeartbeatAgain){webHeartbeatAgain=false;queueLiveRefresh();}}
 }
 function queueLiveRefresh(){

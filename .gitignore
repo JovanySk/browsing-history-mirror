@@ -5,3 +5,4 @@ access.json
 collector_tokens.json
 *private*.json
 __pycache__/
+.demo-data/

@@ -83,7 +83,7 @@ class PersistentArchive:
     def version(self):
         with self.connect() as db:return db.execute("SELECT value FROM control WHERE key='stream_version'").fetchone()[0]
     def request(self,scope):
-        if scope not in SCOPES:raise ValueError('Dispositivo no vÃ¡lido')
+        if scope not in SCOPES:raise ValueError('Dispositivo no válido')
         self.requested[scope]=time.time()
     def changed(self,source,stores=None,pages=False):
         started=time.monotonic();self.last_content_change=started

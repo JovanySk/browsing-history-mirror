@@ -124,6 +124,11 @@ def revoke_session(raw):
         with connect() as db:db.execute('DELETE FROM sessions WHERE token_hash=?',(key,))
         with SESSION_LOCK:SESSION_CACHE.pop(key,None)
 
+def origin_ok(origin):
+    if origin=='https://'+DOMAIN:return True
+    # Local demo only: with MIRROR_DOMAIN=localhost the panel is served over plain HTTP.
+    return DOMAIN in ('localhost','127.0.0.1') and re.fullmatch(r'http://(localhost|127\.0\.0\.1):\d+',origin) is not None
+
 def icon_host(value):
     host=str(value or '').strip().lower().removeprefix('www.')
     if not host or len(host)>253 or not re.fullmatch(r'[a-z0-9.-]+',host):raise ValueError('Dominio no valido')
@@ -482,7 +487,7 @@ class Handler(BaseHTTPRequestHandler):
     def auth_post(self,path):
         if path not in ('/auth/activate','/auth/login','/auth/logout'):return False
         origin=self.headers.get('Origin')
-        if origin and origin!='https://'+DOMAIN:
+        if origin and not origin_ok(origin):
             self.reply(403,{'error':'Origen no autorizado'});return True
         body=self.body()
         if path=='/auth/logout':
@@ -502,7 +507,7 @@ class Handler(BaseHTTPRequestHandler):
             with LOCK:AUTH_ATTEMPTS.pop(client_ip,None)
             self.issue_session();self.reply(200,{'ok':True});return True
         with LOCK:AUTH_ATTEMPTS.setdefault(client_ip,[]).append(now)
-        self.reply(401,{'error':'El enlace o la contraseÃ±a no son vÃ¡lidos.'});return True
+        self.reply(401,{'error':'El enlace o la contraseña no son válidos.'});return True
     def collector(self):
         token=self.headers.get('Authorization','').removeprefix('Bearer ')
         for device,value in TOKENS.items():
@@ -534,7 +539,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(404,{'error':'Ruta no encontrada'})
             if path=='/auth/login.js':return self.reply(200,(ROOT/'static/login.js').read_bytes(),'text/javascript; charset=utf-8',cache='no-store')
             if path in ('/favicon.svg','/favicon.ico'):
-                return self.reply(200,'<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><circle cx="16" cy="16" r="16" fill="#b4a5fa"/><text x="16" y="23" text-anchor="middle" font-family="Arial" font-size="23" font-weight="bold" fill="#202124">H</text></svg>','image/svg+xml',cache='private, max-age=3600')
+                return self.reply(200,'<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#10b981"/><path d="M10 8v16M22 8v16M10 16h12" stroke="#04140d" stroke-width="3.2" stroke-linecap="round"/></svg>','image/svg+xml',cache='private, max-age=3600')
             if path=='/auth/status':
                 connected=self.authenticated();return self.reply(200 if connected else 401,{'connected':connected})
             if not self.require_session(path):return
@@ -561,15 +566,16 @@ class Handler(BaseHTTPRequestHandler):
                 with connect() as db:
                     icon=db.execute('SELECT mime,data FROM icons WHERE host=?',(host.lower().removeprefix('www.'),)).fetchone()
                 if icon:return self.reply(200,bytes(icon['data']),icon['mime'],cache='private, max-age=3600')
-                return self.reply(200,'<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="#9aa0a6" stroke-width="2"/><ellipse cx="16" cy="16" rx="5" ry="11" fill="none" stroke="#9aa0a6" stroke-width="2"/><path d="M5 16h22" stroke="#9aa0a6" stroke-width="2"/></svg>','image/svg+xml')
+                # No stored icon: the panel falls back to an inline letter avatar.
+                return self.reply(404,{'error':'Sin icono'},cache='private, max-age=600')
             if path in ('/favicon.svg','/favicon.ico'):
-                return self.reply(200,'<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><circle cx="16" cy="16" r="16" fill="#b4a5fa"/><text x="16" y="23" text-anchor="middle" font-family="Arial" font-size="23" font-weight="bold" fill="#202124">H</text></svg>','image/svg+xml',cache='private, max-age=3600')
+                return self.reply(200,'<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#10b981"/><path d="M10 8v16M22 8v16M10 16h12" stroke="#04140d" stroke-width="3.2" stroke-linecap="round"/></svg>','image/svg+xml',cache='private, max-age=3600')
             files={'/':'index.html','/viewer.html':'index.html','/index.html':'index.html','/viewer.js':'viewer.js','/web-db.js':'web-db.js','/web-runtime.js':'web-runtime.js','/mobile.css':'mobile.css'}
             if path not in files: return self.reply(404,{'error':'No encontrado'})
             file=ROOT/'static'/files[path]
             kind={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'}[file.suffix]
             return self.reply(200,file.read_bytes(),kind)
-        except TimeoutError:self.reply(503,{'error':'La consulta sigue en preparaciÃ³n; se conserva la Ãºltima lista guardada.','retryAfter':2})
+        except TimeoutError:self.reply(503,{'error':'La consulta sigue en preparación; se conserva la última lista guardada.','retryAfter':2})
         except ArchiveWarming as e:self.reply(503,{'error':str(e),'retryAfter':2})
         except (ValueError,TypeError) as e: self.reply(400,{'error':str(e)})
         except Exception:
@@ -592,7 +598,7 @@ class Handler(BaseHTTPRequestHandler):
             if self.auth_post(path):return
             if not self.require_session(path):return
             origin=self.headers.get('Origin')
-            if origin and origin!='https://'+DOMAIN and not origin.startswith('http://127.0.0.1:'):
+            if origin and not origin_ok(origin) and not origin.startswith('http://127.0.0.1:'):
                 return self.reply(403,{'error':'Origen no autorizado'})
             body=self.body()
             if path=='/api/db': return self.reply(200,{'result':db_operation(body.get('op'),body.get('args') or {},source)})
