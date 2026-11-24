@@ -1,0 +1,23 @@
+# /etc/systemd/system/historial-espejo-v45.service
+[Unit]
+Description=Historial Espejo v4.5 persistent Chrome session
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Environment=EXTENSION_ID=your-extension-id
+ExecStart=/opt/historial-espejo-v45/start-session.sh
+Restart=always
+RestartSec=5
+KillMode=control-group
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target
+
+# /etc/systemd/system/historial-espejo-v45.service.d/resources.conf
+[Service]
+CPUWeight=50
+IOWeight=50

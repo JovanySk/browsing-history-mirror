@@ -1,0 +1,32 @@
+# /etc/systemd/system/historial-espejo-panel.service
+[Unit]
+Description=Historial Espejo web panel and persistent data API
+After=network.target
+[Service]
+User=historial-web
+Group=historial-web
+WorkingDirectory=/opt/historial-espejo-web
+ExecStart=/usr/bin/python3 /opt/historial-espejo-web/server.py
+Environment=PYTHONUNBUFFERED=1
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/historial-espejo-web
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target
+
+# /etc/systemd/system/historial-espejo-panel.service.d/recovery.conf
+[Service]
+Type=notify
+NotifyAccess=main
+WatchdogSec=90
+TimeoutStartSec=120
+Environment=MALLOC_ARENA_MAX=2
+
+# /etc/systemd/system/historial-espejo-panel.service.d/resources.conf
+[Service]
+CPUWeight=800
+IOWeight=800

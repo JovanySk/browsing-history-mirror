@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Historial Espejo",
+  "version": "4.5.22",
+  "description": "Real-time mirror of your own Chrome history, synced to a self-hosted panel.",
+  "permissions": [
+    "history",
+    "storage",
+    "unlimitedStorage",
+    "favicon",
+    "tabs",
+    "alarms"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Historial Espejo",
+    "default_popup": "popup.html"
+  },
+  "options_page": "viewer.html",
+  "host_permissions": [
+    "https://your-panel.example.com/*"
+  ],
+  "version_name": "4.5.22"
+}

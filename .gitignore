@@ -1,0 +1,7 @@
+extension/web_sync_config.js
+*.sqlite3
+*.sqlite3-*
+access.json
+collector_tokens.json
+*private*.json
+__pycache__/

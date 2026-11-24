@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Historial Espejo</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;width:360px;font-family:Arial,Roboto,system-ui,sans-serif;background:#1f2023;color:#e8eaed}
+.wrap{padding:18px}.top{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#8ab4f8,#c58af9);color:#202124;font-weight:900}
+h1{margin:0;font-size:18px}.live{margin-left:auto;display:flex;align-items:center;gap:6px;color:#81c995;font-size:11px}.dot{width:8px;height:8px;border-radius:50%;background:#81c995;box-shadow:0 0 0 4px rgba(129,201,149,.12)}
+.card{margin:15px 0;padding:13px;border:1px solid #3c4043;border-radius:14px;background:#292a2d}
+.label{font-size:11px;color:#9aa0a6}.value{font-size:14px;margin-top:5px;line-height:1.35}
+button{width:100%;height:42px;border:0;border-radius:21px;background:#8ab4f8;color:#202124;font-weight:700;cursor:pointer}
+small{display:block;margin-top:11px;color:#9aa0a6;line-height:1.4}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="logo">H</div><h1>Historial Espejo</h1><div class="live"><span class="dot"></span>En vivo</div></div>
+  <div class="card"><div class="label">PRESENCIA COMPARTIDA</div><div id="presenceValue" class="value">Sin señal</div></div>
+  <button id="open">Abrir panel completo</button>
+  <small>Seguimiento local del perfil: historial, pestañas y borrados.</small>
+</div>
+<script src="popup.js"></script>
+</body></html>

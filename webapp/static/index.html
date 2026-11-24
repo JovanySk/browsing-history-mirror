@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Historial Espejo</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+:root{
+  color-scheme:dark;--bg:#202124;--surface:#292a2d;--surface2:#303134;--hover:#35363a;--border:#3c4043;
+  --text:#e8eaed;--muted:#9aa0a6;--blue:#8ab4f8;--blue2:#d2e3fc;--green:#81c995;--red:#f28b82;--yellow:#fdd663;--violet:#c58af9
+}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,Roboto,system-ui,sans-serif;background:var(--bg);color:var(--text)}button,input{font:inherit}button{cursor:pointer}
+.topbar{position:sticky;top:0;z-index:50;height:74px;display:grid;grid-template-columns:250px minmax(360px,760px) 1fr;align-items:center;gap:24px;padding:0 28px;background:rgba(32,33,36,.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.02)}
+.brand{display:flex;align-items:center;gap:13px;font-size:21px;font-weight:500}.brandIcon{width:33px;height:33px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--violet));color:#202124;font-weight:900}
+.search{position:relative}.search input{width:100%;height:48px;border:none;outline:none;border-radius:24px;background:#303134;color:var(--text);padding:0 48px;font-size:15px;box-shadow:0 1px 2px rgba(0,0,0,.18)}.search input:focus{background:#3c4043}
+.searchIcon{position:absolute;left:17px;top:13px;font-size:20px;color:#bdc1c6}.clearSearch{position:absolute;right:10px;top:7px;width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:#bdc1c6;display:none}
+.headerActions{display:flex;justify-content:flex-end;align-items:center;gap:9px}.livePill{display:flex;align-items:center;gap:7px;height:34px;padding:0 12px;border:1px solid #355a42;border-radius:17px;color:#b9e6c4;font-size:12px;background:#243329}.liveDot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(129,201,149,.10)}
+.iconBtn,.pillBtn{border:1px solid var(--border);background:transparent;color:var(--text)}.iconBtn{width:38px;height:38px;border-radius:50%}.pillBtn{height:38px;border-radius:19px;padding:0 14px}.pillBtn:hover,.iconBtn:hover{background:#34363a}.pillBtn.primary{background:var(--blue);color:#202124;border-color:var(--blue);font-weight:700}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:calc(100vh - 74px)}.sidebar{position:sticky;top:74px;height:calc(100vh - 74px);padding:16px 12px;border-right:1px solid #2b2d31}
+.navitem{height:44px;padding:0 18px;display:flex;align-items:center;gap:15px;border-radius:0 22px 22px 0;color:#e8eaed;font-size:14px;cursor:pointer;margin-bottom:4px}.navitem:hover{background:var(--hover)}.navitem.active{background:#27364d;color:#d2e3fc}.navIcon{width:21px;text-align:center;font-size:17px}.sideSep{height:1px;background:#34363a;margin:14px 12px}.sideStats{padding:7px 18px;color:var(--muted);font-size:12px;line-height:1.6}.sideStats b{color:#e8eaed;font-weight:600}
+.mainWrap{width:100%;max-width:1180px;margin:0 auto;padding:18px 30px 70px}.toolbar{min-height:48px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;position:sticky;top:74px;z-index:35;background:rgba(32,33,36,.97);backdrop-filter:blur(10px);padding:8px 0 10px}
+.chip,.datebox{height:36px;border:1px solid var(--border);border-radius:18px;background:transparent;color:#e8eaed;padding:0 13px}.chip.active{background:#394457;border-color:#5d7597;color:#d2e3fc}.datebox{background:#292a2d}.toolbarMeta{margin-left:auto;color:var(--muted);font-size:12px}
+.liveCard{display:none;position:relative;overflow:hidden;margin:4px 0 18px;border:1px solid #45556f;border-radius:18px;background:linear-gradient(135deg,#263449 0%,#292a2d 60%,#302a3d 100%);padding:18px}.liveCard.show{display:block}.liveCard:before{content:"";position:absolute;width:240px;height:240px;border-radius:50%;right:-90px;top:-120px;background:radial-gradient(circle,rgba(138,180,248,.18),transparent 65%);pointer-events:none}
+.liveTop{display:flex;align-items:center;gap:10px}.liveTitle{font-size:13px;color:#d2e3fc;font-weight:700;letter-spacing:.02em}.liveNow{margin-left:auto;color:#81c995;font-size:12px;display:flex;align-items:center;gap:7px}.cardMain{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:end;margin-top:14px}.cardWork{font-size:19px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cardSub{margin-top:6px;color:#bdc1c6;font-size:13px}.cardNumbers{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.bigBadge{min-width:100px;padding:10px 13px;border-radius:14px;background:rgba(32,33,36,.52);border:1px solid rgba(255,255,255,.10);text-align:center}.bigBadge b{display:block;font-size:18px;color:#e8eaed}.bigBadge span{font-size:10px;color:#9aa0a6;text-transform:uppercase;letter-spacing:.06em}
+.notice{display:none;margin:8px 0 14px;padding:12px 14px;border:1px solid #5f6368;border-radius:10px;background:#292a2d;color:#d7d9dd;font-size:13px}.notice.show{display:block}
+.day{margin:0 0 18px}.dayHeader{height:46px;display:flex;align-items:center;gap:10px;padding:0 7px;color:#bdc1c6;font-size:14px;font-weight:600;cursor:pointer}.dayHeader .arr{font-size:11px;transition:transform .15s}.day.collapsed .arr{transform:rotate(-90deg)}.day.collapsed .entries{display:none}.dayCount{margin-left:auto;font-size:12px;color:#9aa0a6;font-weight:400}
+.entries{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#292a2d}.entry{display:grid;grid-template-columns:42px 92px minmax(0,1fr) auto;gap:10px;align-items:center;min-height:70px;padding:9px 14px;border-bottom:1px solid #3c4043}.entry:last-child{border-bottom:none}.entry:hover{background:#303134}
+.favicon{width:32px;height:32px;border-radius:50%;background:#3c4043;display:grid;place-items:center;overflow:hidden}.favicon img{width:22px;height:22px;object-fit:contain}.time{font-size:13px;color:#bdc1c6;white-space:nowrap}.mainline{min-width:0;cursor:pointer}.title{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.host{font-size:12px;color:#9aa0a6;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tags{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}.tag{height:26px;padding:0 9px;border-radius:13px;border:1px solid var(--border);display:inline-flex;align-items:center;gap:6px;font-size:11px;white-space:nowrap;background:#303134;color:#bdc1c6}.tag.present{background:#23372b;border-color:#3f684d;color:#b7e5c2}.tag.deleted{background:#452b2a;border-color:#7d4945;color:#ffb4ad}.tag.unknown{background:#303134;color:#bdc1c6}.statusDot{width:7px;height:7px;border-radius:50%;background:currentColor}.more{width:30px;height:30px;border:0;border-radius:50%;background:transparent;color:#bdc1c6}.more:hover{background:#45474d}
+.details{grid-column:2/-1;display:none;background:#25262a;border-radius:8px;margin:-1px 0 3px;padding:10px 12px;font-size:12px;color:#bdc1c6;line-height:1.55}.entry.open .details{display:block}.detailrow{display:flex;gap:10px;margin:4px 0;align-items:flex-start}.detailkey{width:90px;flex:0 0 auto;color:#9aa0a6}.detailurl{word-break:break-all;color:#8ab4f8}.smallBtn{margin-top:8px;margin-right:6px;padding:6px 10px;border:1px solid var(--border);border-radius:15px;background:#303134;color:#e8eaed}
+.loadMoreWrap{display:flex;justify-content:center;padding:10px 0 24px}.loadMore{height:40px;padding:0 18px;border-radius:20px;border:1px solid #5f6368;background:#2d2f33;color:#e8eaed}.loadMore:hover{background:#36383d}.empty{padding:70px 20px;text-align:center;color:#9aa0a6}.emptyIcon{font-size:44px;margin-bottom:10px}
+.siteCard,.sessionCard{display:flex;align-items:center;gap:14px;padding:15px 16px;margin-bottom:10px;border:1px solid var(--border);border-radius:12px;background:#292a2d}.siteCard:hover,.sessionCard:hover{background:#303134}.cardTitle{font-size:14px}.cardMeta{font-size:12px;color:#9aa0a6;margin-top:5px}.cardRight{margin-left:auto;text-align:right;font-size:12px;color:#bdc1c6}
+.snackbar{position:fixed;right:24px;bottom:24px;z-index:80;display:none;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;background:#303134;border:1px solid #5f6368;box-shadow:0 6px 30px rgba(0,0,0,.35);font-size:13px}.snackbar.show{display:flex}.snackbar button{border:0;background:transparent;color:#8ab4f8;font-weight:700}
+.loadingBar{position:fixed;left:260px;right:0;top:74px;height:3px;background:transparent;z-index:60;overflow:hidden;display:none}.loadingBar.show{display:block}.loadingBar:after{content:"";display:block;height:100%;width:35%;background:#8ab4f8;animation:slide 1s linear infinite}@keyframes slide{from{transform:translateX(-110%)}to{transform:translateX(330%)}}
+@media(max-width:950px){.topbar{grid-template-columns:1fr;height:auto;padding:10px 16px;gap:10px}.brand{display:none}.headerActions{justify-content:flex-start}.layout{grid-template-columns:1fr}.sidebar{display:none}.mainWrap{padding:14px}.toolbar{top:116px}.entry{grid-template-columns:36px 78px minmax(0,1fr)}.tags{grid-column:3;justify-content:flex-start}.details{grid-column:1/-1}.cardMain{grid-template-columns:1fr}.cardNumbers{justify-content:flex-start}.loadingBar{left:0;top:116px}}
+</style>
+<link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="brandIcon">H</div><span>Historial Espejo</span></div>
+  <div class="search"><span class="searchIcon">⌕</span><input id="q" type="search" placeholder="Buscar en el historial espejo"><button id="clearSearch" class="clearSearch">✕</button></div>
+  <div class="headerActions">
+    <div class="livePill"><span class="liveDot"></span><span id="liveText">Conectando…</span></div>
+    <button id="presenceToggle" class="pillBtn" title="Comparte la pestaña web activa de ESTE dispositivo. Déjalo OFF en el equipo que solo recibe.">Emitir presencia: OFF</button>
+    <button id="verify" class="pillBtn">Verificar visibles</button>
+    <button id="import" title="Importar el historial del dispositivo de captura conectado" class="pillBtn primary">Importar Chrome</button>
+    <button id="export" class="iconBtn" title="Exportar CSV">⇩</button>
+  </div>
+</header>
+<div id="loadingBar" class="loadingBar"></div>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="navitem active" data-view="history"><span class="navIcon">◷</span>Historial completo</div>
+  <div class="navitem" data-view="deleted"><span class="navIcon">⌫</span>Borrado de Chrome</div>
+  <div class="navitem" data-view="sites"><span class="navIcon">◎</span>Sitios</div>
+  <div class="sideSep"></div><div id="sideStats" class="sideStats">Cargando…</div>
+</aside>
+
+<main class="mainWrap"><select id="mobileNav" class="mobileNav" aria-label="Sección"><option value="history">Historial completo</option><option value="deleted">Borrado de Chrome</option><option value="sites">Sitios</option></select><div id="webMobileStats" class="mobileStats"></div><div class="webSyncBar"><span id="webStatus" class="webStatus" role="status">Conectando con tus datos…</span><label>Mostrar <select id="webSource" aria-label="Dispositivo de origen"><option value="all">Todos los dispositivos</option></select></label></div>
+  <section id="archiveControls" class="archiveControls"><div class="archiveControlRow"><label>Periodo <select id="archiveRange"><option value="all">Todas las fechas</option><option value="today">Hoy</option><option value="yesterday">Ayer</option><option value="last3">Últimos 3 días</option><option value="last7">Últimos 7 días</option></select></label></div><div id="archiveCounts" class="archiveCounts"></div><button id="archiveLiveNew" class="pillBtn" hidden>Hay nuevas visitas · volver a la primera página</button></section>
+
+  <section id="presenceCard" class="liveCard show" style="border-color:#3f684d;background:linear-gradient(135deg,#20352a 0%,#292a2d 62%,#2b3341 100%)">
+    <div class="liveTop">
+      <span class="liveTitle">PRESENCIA COMPARTIDA</span>
+      <span id="presenceStatus" class="liveNow"><span class="liveDot"></span> Sin señal</span>
+    </div>
+    <div class="cardMain">
+      <div>
+        <div id="presenceTitle" class="cardWork">Esperando un dispositivo que comparta su pestaña activa…</div>
+        <div id="presenceSub" class="cardSub">Activa “Emitir presencia” únicamente en el dispositivo que quieras compartir.</div>
+        <div id="presenceUrl" class="cardSub" style="word-break:break-all;margin-top:8px;color:#8ab4f8"></div>
+      </div>
+      <div class="cardNumbers">
+        <div class="bigBadge"><b id="presenceDevice">—</b><span>Dispositivo</span></div>
+        <div class="bigBadge"><b id="presenceElapsed">—</b><span>En esta página</span></div>
+        <div class="bigBadge"><b id="presenceSignal">—</b><span>Última señal</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div id="notice" class="notice"></div>
+
+  <div id="toolbar" class="toolbar">
+    <input id="from" class="datebox" type="date" title="Desde">
+    <input id="to" class="datebox" type="date" title="Hasta">
+    <span id="toolbarMeta" class="toolbarMeta"></span>
+  </div>
+
+  <section id="content"></section>
+  <div id="loadMoreWrap" class="loadMoreWrap"><button id="loadMore" class="loadMore">Cargar 100 más</button></div>
+</main>
+</div>
+
+<div id="snackbar" class="snackbar"><span id="snackbarText">Nueva actividad</span><button id="snackbarAction">Actualizar</button></div>
+<script src="web-db.js"></script><script src="web-runtime.js"></script><script src="viewer.js"></script>
+</body>
+</html>
